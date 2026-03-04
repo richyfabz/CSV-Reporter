@@ -24,3 +24,13 @@ def load_config() -> AppConfig:
     available_stats = yaml_data["stats"]["available"]
 
 
+config = AppConfig(
+    app_name=app_name,
+    default_file=default_file,
+    max_rows=max_rows,
+    delimiter=delimiter,
+    encoding=encoding,
+    available_stats=available_stats,
+)
+
+return config
