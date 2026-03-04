@@ -1,0 +1,20 @@
+#application configuration file for CSV Reporter
+app:
+  name: CSV Reporter
+  version: "1.0"
+
+# defaults for the application, can be overridden by user input or command line arguments
+defaults:
+  file: sample.csv
+  delimiter: ","
+  encoding: utf-8
+  
+# supported statistics that can be calculated on the data
+stats:
+  available:
+    - mean
+    - sum
+    - min
+    - max
+    - count
+    - median
