@@ -6,7 +6,7 @@ from models import AppConfig
 # Load the .env file into environment variables
 load_dotenv()
 
-# setups the app configuration by reading from .env and config.yaml, then validating with Pydantic
+
 def load_config() -> AppConfig:
     """Read .env and config.yaml, combine them, validate with Pydantic."""
 
@@ -23,14 +23,14 @@ def load_config() -> AppConfig:
     encoding = yaml_data["defaults"]["encoding"]
     available_stats = yaml_data["stats"]["available"]
 
+    # --- Combine and validate with Pydantic ---
+    config = AppConfig(
+        app_name=app_name,
+        default_file=default_file,
+        max_rows=max_rows,
+        delimiter=delimiter,
+        encoding=encoding,
+        available_stats=available_stats,
+    )
 
-config = AppConfig(
-    app_name=app_name,
-    default_file=default_file,
-    max_rows=max_rows,
-    delimiter=delimiter,
-    encoding=encoding,
-    available_stats=available_stats,
-)
-
-return config
+    return config
