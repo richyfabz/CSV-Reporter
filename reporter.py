@@ -19,7 +19,7 @@ def load_csv(filepath: str, delimiter: str = ",", encoding: str = "utf-8") -> pd
         raise ValueError("The CSV file is empty.")
 
     return df
-    
+
 def get_column_stats(df: pd.DataFrame, column: str, stat: str) -> float:
     """Run a single stat (mean, sum, etc.) on a specific column."""
 
@@ -42,3 +42,17 @@ def get_column_stats(df: pd.DataFrame, column: str, stat: str) -> float:
         raise ValueError(f"Unknown stat '{stat}'. Choose from: {list(operations.keys())}")
 
     return round(operations[stat], 2)
+
+def get_summary(df: pd.DataFrame) -> dict:
+    """Return a full summary of the CSV file."""
+
+    summary = {
+        "total_rows": len(df),
+        "total_columns": len(df.columns),
+        "columns": list(df.columns),
+        "numeric_columns": list(df.select_dtypes(include="number").columns),
+        "text_columns": list(df.select_dtypes(include="object").columns),
+        "missing_values": df.isnull().sum().to_dict(),
+    }
+
+    return summary
