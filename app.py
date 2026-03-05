@@ -13,3 +13,14 @@ app = typer.Typer(help="CSV Reporter — analyze your CSV files from the termina
 console = Console()
 config = load_config()
 
+# --- Command 1: Summary ---
+@app.command()
+def summary(
+    file: str = typer.Option(None, "--file", "-f", help="Path to the CSV file"),
+):
+    """Print a full summary of the CSV file."""
+
+    # Use default file from config if none provided
+    filepath = file or config.default_file
+
+    console.print(f"\n[bold cyan]Loading file:[/bold cyan] {filepath}\n")
