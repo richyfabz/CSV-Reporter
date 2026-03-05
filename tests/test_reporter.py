@@ -47,7 +47,7 @@ def test_load_csv_wrong_extension():
 
 #Happy path tests
 
- def test_get_summary_row_count(sample_df):
+def test_get_summary_row_count(sample_df):
     """Happy path — correct number of rows."""
     result = get_summary(sample_df)
     assert result["total_rows"] == 4

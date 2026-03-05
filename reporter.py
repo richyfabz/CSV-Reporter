@@ -51,7 +51,7 @@ def get_summary(df: pd.DataFrame) -> dict:
         "total_columns": len(df.columns),
         "columns": list(df.columns),
         "numeric_columns": list(df.select_dtypes(include="number").columns),
-        "text_columns": list(df.select_dtypes(include="object").columns),
+        "text_columns": list(df.select_dtypes(include="str").columns),
         "missing_values": df.isnull().sum().to_dict(),
     }
 
