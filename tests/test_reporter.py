@@ -21,3 +21,22 @@ def sample_df():
 def empty_df():
     """Creates an empty DataFrame for edge case testing. """
     return pd.DataFrame()
+
+# TESTS — load_csv()
+ef test_load_csv_success():
+    """Happy path — loading a real CSV file works."""
+    df = load_csv("sample.csv")
+    assert df is not None
+    assert len(df) > 0
+
+
+def test_load_csv_file_not_found():
+    """Error case — file that doesn't exist raises FileNotFoundError."""
+    with pytest.raises(FileNotFoundError):
+        load_csv("nonexistent.csv")
+
+
+def test_load_csv_wrong_extension():
+    """Error case — non CSV file raises ValueError."""
+    with pytest.raises(ValueError):
+        load_csv("config.yaml")
