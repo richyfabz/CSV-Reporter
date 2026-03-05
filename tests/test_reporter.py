@@ -22,14 +22,16 @@ def empty_df():
     """Creates an empty DataFrame for edge case testing. """
     return pd.DataFrame()
 
-# TESTS — load_csv()
-ef test_load_csv_success():
+#TESTS — load_csv()
+
+#Happy path tests
+def test_load_csv_success():
     """Happy path — loading a real CSV file works."""
     df = load_csv("sample.csv")
     assert df is not None
     assert len(df) > 0
 
-
+#Error cases tests
 def test_load_csv_file_not_found():
     """Error case — file that doesn't exist raises FileNotFoundError."""
     with pytest.raises(FileNotFoundError):
@@ -40,3 +42,52 @@ def test_load_csv_wrong_extension():
     """Error case — non CSV file raises ValueError."""
     with pytest.raises(ValueError):
         load_csv("config.yaml")
+
+# TESTS — get_summary()
+
+#Happy path tests
+
+ def test_get_summary_row_count(sample_df):
+    """Happy path — correct number of rows."""
+    result = get_summary(sample_df)
+    assert result["total_rows"] == 4
+
+
+def test_get_summary_column_count(sample_df):
+    """Happy path — correct number of columns."""
+    result = get_summary(sample_df)
+    assert result["total_columns"] == 5
+
+
+def test_get_summary_numeric_columns(sample_df):
+    """Happy path — numeric columns are correctly identified."""
+    result = get_summary(sample_df)
+    assert "salary" in result["numeric_columns"]
+    assert "age" in result["numeric_columns"]
+    assert "score" in result["numeric_columns"]
+
+
+def test_get_summary_text_columns(sample_df):
+    """Happy path — text columns are correctly identified."""
+    result = get_summary(sample_df)
+    assert "name" in result["text_columns"]
+    assert "department" in result["text_columns"]
+
+
+def test_get_summary_no_missing_values(sample_df):
+    """Happy path — no missing values in clean data."""
+    result = get_summary(sample_df)
+    for col, count in result["missing_values"].items():
+        assert count == 0
+
+#Error case tests
+def test_get_summary_with_missing_values():
+    """Edge case — missing values are counted correctly."""
+    data = {
+        "name":   ["Alice", "Bob", None],
+        "salary": [95000, None, 58000],
+    }
+    df = pd.DataFrame(data)
+    result = get_summary(df)
+    assert result["missing_values"]["name"] == 1
+    assert result["missing_values"]["salary"] == 1
