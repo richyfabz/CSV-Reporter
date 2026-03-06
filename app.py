@@ -16,13 +16,13 @@ Examples:
 
   python app.py stats --column age --stat max
 """,
-    no_args_is_help=True,
+    no_args_is_help=True, # Show help text automatically when no command is given
 )
 
-console = Console()
-config = load_config()
+console = Console()       # Rich console used for all terminal output
+config = load_config()    # Load app config once at startup (shared across commands)
 
-
+# Command: summary
 @app.command()
 def summary(
     file: str = typer.Option(
@@ -42,18 +42,23 @@ def summary(
 
       python app.py summary
     """
+    # Use the provided file path or fall back to the default from config
 
     filepath = file or config.default_file
 
     console.print(f"\n[bold cyan]Loading file:[/bold cyan] {filepath}\n")
 
     try:
+          # Load the CSV into a DataFrame and compute the summary
+
         df = load_csv(filepath, config.delimiter, config.encoding)
         result = get_summary(df)
 
+        # Print top-level counts
         console.print(f"[bold]Total Rows:[/bold]    {result['total_rows']}")
         console.print(f"[bold]Total Columns:[/bold] {result['total_columns']}")
 
+        # Build a Rich table showing each column's name, type, and missing value count
         table = Table(title="Columns Overview", show_header=True)
         table.add_column("Column Name", style="cyan")
         table.add_column("Type", style="magenta")
@@ -68,16 +73,18 @@ def summary(
         console.print(f"\n[dim]Tip: Run 'python app.py stats --column <name> --stat <stat>' to analyse a column.[/dim]\n")
 
     except FileNotFoundError:
+        # File path was invalid or the file doesn't exist
         console.print(f"\n[bold red]Error:[/bold red] File '[yellow]{filepath}[/yellow]' was not found.")
         console.print("[dim]Tip: Make sure the file exists in your current folder or provide the full path.[/dim]")
         console.print("[dim]Example: python app.py summary --file data.csv[/dim]\n")
         raise typer.Exit(code=1)
 
     except ValueError as e:
+         # Catch data-related errors raised by reporter.py (e.g. empty file, bad format)
         console.print(f"\n[bold red]Error:[/bold red] {e}\n")
         raise typer.Exit(code=1)
 
-
+# Command: stats
 @app.command()
 def stats(
     file: str = typer.Option(
@@ -110,6 +117,7 @@ def stats(
       python app.py stats -c score -s median
     """
 
+    # Use the provided file path or fall back to the default from config
     filepath = file or config.default_file
 
     # --- Guard: column is required, show helpful message if missing ---
@@ -117,7 +125,7 @@ def stats(
         console.print("\n[bold red]Error:[/bold red] Missing required option [yellow]--column[/yellow] / [yellow]-c[/yellow]")
         console.print("[dim]You need to tell the tool which column to analyse.[/dim]")
 
-        # Try to load the CSV and show available columns as a hint
+        # Attempt to load the CSV and hint the user with available column names
         try:
             df = load_csv(filepath, config.delimiter, config.encoding)
             result = get_summary(df)
@@ -127,6 +135,7 @@ def stats(
                 console.print(f"  [cyan]{col}[/cyan] [dim]({col_type})[/dim]")
             console.print(f"\n[dim]Example: python app.py stats --column {result['numeric_columns'][0]} --stat mean[/dim]\n")
         except Exception:
+              # If CSV can't be loaded, fall back to a generic example
             console.print(f"\n[dim]Example: python app.py stats --column salary --stat mean[/dim]\n")
 
         raise typer.Exit(code=1)
@@ -139,11 +148,13 @@ def stats(
         console.print(f"[dim]Example: python app.py stats --column {column} --stat mean[/dim]\n")
         raise typer.Exit(code=1)
 
+    # Echo back the active parameters so the user knows what's being computed
     console.print(f"\n[bold cyan]File:[/bold cyan]   {filepath}")
     console.print(f"[bold cyan]Column:[/bold cyan] {column}")
     console.print(f"[bold cyan]Stat:[/bold cyan]   {stat}\n")
 
     try:
+         # Load CSV and compute the requested stat on the specified column
         df = load_csv(filepath, config.delimiter, config.encoding)
         result = get_column_stats(df, column, stat)
         console.print(f"[bold green]{stat.upper()} of '{column}':[/bold green] {result}\n")
@@ -158,7 +169,7 @@ def stats(
         error_msg = str(e)
         console.print(f"\n[bold red]Error:[/bold red] {error_msg}")
 
-        # If column not found, show available columns
+        # If the column wasn't found, load the CSV again and show what columns are available
         if "not found" in error_msg:
             try:
                 df = load_csv(filepath, config.delimiter, config.encoding)
@@ -168,8 +179,9 @@ def stats(
                     col_type = "numeric" if col in result["numeric_columns"] else "text"
                     console.print(f"  [cyan]{col}[/cyan] [dim]({col_type})[/dim]")
                 console.print(f"\n[dim]Example: python app.py stats --column {result['numeric_columns'][0]} --stat mean[/dim]\n")
-            except Exception:
-                pass
+            except Exception: 
+                pass  # Silently skip if the CSV can't be re-loaded at this point
+
 
         raise typer.Exit(code=1)
 
